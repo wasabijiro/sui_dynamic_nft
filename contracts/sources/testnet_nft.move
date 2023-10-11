@@ -1,4 +1,4 @@
-module nft::testnet_nft {
+module nft::dev_nft {
     use sui::url::{Self, Url};
     use std::string;
     use sui::object::{Self, ID, UID};
@@ -91,5 +91,51 @@ module nft::testnet_nft {
     public entry fun burn(nft: TestNetNFT, _: &mut TxContext) {
         let TestNetNFT { id, name: _, description: _, url: _ } = nft;
         object::delete(id)
+    }
+}
+
+#[test_only]
+module nft::dev_nftTests {
+    use nft::dev_nft::{Self, TestNetNFT};
+    use sui::test_scenario as ts;
+    use sui::transfer;
+    use std::string;
+
+    #[test]
+    fun mint_transfer_update() {
+        let addr1 = @0xA;
+        let addr2 = @0xB;
+        // create the NFT
+        let scenario = ts::begin(addr1);
+
+        {
+            dev_nft::mint_to_sender(
+                b"test",
+                b"a test",
+                b"https://www.sui.io",
+                ts::ctx(&mut scenario)
+            )
+        };
+        // send it from A to B
+        ts::next_tx(&mut scenario, addr1);
+        {
+            let nft = ts::take_from_sender<TestNetNFT>(&mut scenario);
+            transfer::public_transfer(nft, addr2);
+        };
+        // update its description
+        ts::next_tx(&mut scenario, addr2);
+        {
+            let nft = ts::take_from_sender<TestNetNFT>(&mut scenario);
+            dev_nft::update_description(&mut nft, b"a new description", ts::ctx(&mut scenario));
+            assert!(*string::bytes(dev_nft::description(&nft)) == b"a new description", 0);
+            ts::return_to_sender(&mut scenario, nft);
+        };
+        // burn it
+        ts::next_tx(&mut scenario, addr2);
+        {
+            let nft = ts::take_from_sender<TestNetNFT>(&mut scenario);
+            dev_nft::burn(nft, ts::ctx(&mut scenario))
+        };
+        ts::end(scenario);
     }
 }
