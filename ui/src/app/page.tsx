@@ -4,6 +4,8 @@ import { ConnectButton, useWallet } from "@suiet/wallet-kit";
 import { useState, useEffect } from "react";
 import { moveCallMintNft } from "../libs/movecall";
 import { TransactionBlock } from "@mysten/sui.js";
+import { NFT_PACKAGE_ID } from "../config/constants";
+import { getUrl } from "@/libs/getObject";
 
 export default function Home() {
   const { signAndExecuteTransactionBlock } = useWallet();
@@ -12,10 +14,32 @@ export default function Home() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
 
-  const handleInputChange = (e, setter) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setter: React.Dispatch<React.SetStateAction<string>>
+  ) => {
     setter(e.target.value);
   };
+
+  const [color, setColor] = useState({
+    red: 255,
+    green: 255,
+    blue: 255,
+  });
+
+  const handleColorChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    colorName: string
+  ) => {
+    setColor({
+      ...color,
+      [colorName]: e.target.value,
+    });
+  };
+
+  const rgbColor = `rgb(${color.red}, ${color.green}, ${color.blue})`;
 
   const exctuteMintNFT = async () => {
     const txb = new TransactionBlock();
@@ -26,12 +50,30 @@ export default function Home() {
       description: "mugiwara",
       url: "https://toy.bandai.co.jp/assets/tamagotchi/images/chopper/img_chara01.png",
     });
-    const result = await signAndExecuteTransactionBlock({
+    const result: any = await signAndExecuteTransactionBlock({
       transactionBlock: txb,
     });
     console.log({ result });
+    const targetObjectType = `${NFT_PACKAGE_ID}::dev_nft::TestNetNFT`;
+    let objectId = null;
+    if (result.objectChanges) {
+      const objectChange = result.objectChanges.find(
+        (change: any) => change.objectType === targetObjectType
+      );
+      objectId = objectChange?.objectId;
+    }
+
+    if (objectId) {
+      console.log({ objectId });
+      localStorage.setItem("ID", objectId);
+    } else {
+      console.log("No object with the target objectType found");
+    }
     const tx_url = `https://suiexplorer.com/txblock/${result.digest}?network=testnet`;
     console.log(tx_url);
+    const image_url = await getUrl();
+    console.log({ image_url });
+    setImageUrl(image_url);
   };
 
   useEffect(() => {
@@ -43,7 +85,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col justify-center p-4">
-      <header className="mb-20 flex justify-end items-start">
+      <header className="mb-10 flex justify-end items-start">
         <ConnectButton />
       </header>
       <div className="flex items-center justify-center">
@@ -78,6 +120,46 @@ export default function Home() {
           >
             Mint
           </button>
+          {imageUrl && (
+            <div className="flex items-center mt-4 gap-10">
+              <img src={imageUrl} alt="Dynamic" className="mr-4" />
+              <div className="flex flex-col gap-5">
+                <div className="flex items-center mb-2">
+                  <label style={{ width: "60px" }}>Red:</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="255"
+                    value={color.red}
+                    onChange={(e) => handleColorChange(e, "red")}
+                    style={{ width: "300px" }}
+                  />
+                </div>
+                <div className="flex items-center mb-2">
+                  <label style={{ width: "60px" }}>Green:</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="255"
+                    value={color.green}
+                    onChange={(e) => handleColorChange(e, "green")}
+                    style={{ width: "300px" }}
+                  />
+                </div>
+                <div className="flex items-center mb-2">
+                  <label style={{ width: "60px" }}>Blue:</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="255"
+                    value={color.blue}
+                    onChange={(e) => handleColorChange(e, "blue")}
+                    style={{ width: "300px" }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>
