@@ -9,7 +9,6 @@ import {
   moveCallUpdateB,
 } from "../libs/movecall";
 import { NFT_PACKAGE_ID } from "../config/constants";
-import { getUrl } from "@/libs/getObject";
 import {
   ObjectId,
   getObjectFields,
@@ -17,10 +16,12 @@ import {
   TransactionBlock,
 } from "@mysten/sui.js";
 import { providerSuiTestnet } from "../config/sui";
+import { changeColor } from "@/libs/color";
 
 export default function Home() {
   const { signAndExecuteTransactionBlock } = useWallet();
   const wallet = useWallet();
+  const targetObjectType = `${NFT_PACKAGE_ID}::dev_nft::TestNetNFT`;
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -86,7 +87,6 @@ export default function Home() {
       transactionBlock: txb,
     });
     console.log({ mint_result });
-    const targetObjectType = `${NFT_PACKAGE_ID}::dev_nft::TestNetNFT`;
     let objectId = null;
     if (mint_result.objectChanges) {
       const objectChange = mint_result.objectChanges.find(
@@ -121,34 +121,73 @@ export default function Home() {
       transactionBlock: txb,
     });
     console.log({ r_result });
+    // let id = null;
+    // if (r_result.objectChanges) {
+    //   const objectChange = r_result.objectChanges.find(
+    //     (change: any) => change.objectType === targetObjectType
+    //   );
+    //   id = objectChange?.objectId;
+    // }
+
+    // if (id) {
+    //   console.log({ id });
+    //   setObjectId(id);
+    //   // localStorage.setItem("ID", objectId);
+    // } else {
+    //   console.log("No object with the target objectType found");
+    // }
+    // const tx_url = `https://suiexplorer.com/txblock/${r_result.digest}?network=testnet`;
+    // console.log(tx_url);
+    // const image_url = await getUrl(objectId);
+    // console.log({ image_url });
+    // setImageUrl(image_url);
   };
 
-  const executeUpdateG = async (new_r: number) => {
+  const executeUpdateG = async (new_g: number) => {
     const txb = new TransactionBlock();
 
-    moveCallUpdateR({
+    moveCallUpdateG({
       txb,
       id: objectId,
-      new_r: new_r,
+      new_g: new_g,
     });
     const g_result: any = await signAndExecuteTransactionBlock({
       transactionBlock: txb,
     });
     console.log({ g_result });
+    // const image_url = await getUrl(objectId);
+    // setImageUrl(image_url);
   };
 
-  const executeUpdateB = async (new_r: number) => {
+  const executeUpdateB = async (new_b: number) => {
     const txb = new TransactionBlock();
 
-    moveCallUpdateR({
+    moveCallUpdateB({
       txb,
       id: objectId,
-      new_r: new_r,
+      new_b: new_b,
     });
     const b_result: any = await signAndExecuteTransactionBlock({
       transactionBlock: txb,
     });
     console.log({ b_result });
+    // const image_url = await getUrl(objectId);
+    // setImageUrl(image_url);
+  };
+
+  const updateColor = async () => {
+    try {
+      const modifiedImageUrl = await changeColor(
+        imageUrl,
+        color.red,
+        color.green,
+        color.blue
+      );
+      console.log("Modified Image URL:", modifiedImageUrl);
+      setImageUrl(modifiedImageUrl);
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   useEffect(() => {
@@ -209,11 +248,12 @@ export default function Home() {
                     max="255"
                     value={color.red}
                     onChange={(e) => handleColorChange(e, "red")}
-                    onMouseUp={(e) =>
-                      executeUpdateR(
+                    onMouseUp={async (e) => {
+                      await executeUpdateR(
                         parseInt((e.target as HTMLInputElement).value)
-                      )
-                    }
+                      );
+                      updateColor();
+                    }}
                     style={{ width: "300px" }}
                   />
                   <span className="ml-2">{color.red}</span>
@@ -226,11 +266,12 @@ export default function Home() {
                     max="255"
                     value={color.green}
                     onChange={(e) => handleColorChange(e, "green")}
-                    onMouseUp={(e) =>
-                      executeUpdateG(
+                    onMouseUp={async (e) => {
+                      await executeUpdateG(
                         parseInt((e.target as HTMLInputElement).value)
-                      )
-                    }
+                      );
+                      updateColor();
+                    }}
                     style={{ width: "300px" }}
                   />
                   <span className="ml-2">{color.green}</span>
@@ -243,11 +284,12 @@ export default function Home() {
                     max="255"
                     value={color.blue}
                     onChange={(e) => handleColorChange(e, "blue")}
-                    onMouseUp={(e) =>
-                      executeUpdateB(
+                    onMouseUp={async (e) => {
+                      await executeUpdateB(
                         parseInt((e.target as HTMLInputElement).value)
-                      )
-                    }
+                      );
+                      updateColor();
+                    }}
                     style={{ width: "300px" }}
                   />
                   <span className="ml-2">{color.blue}</span>
