@@ -20,6 +20,48 @@ export const moveCallMintNft = async (props: {
   });
 };
 
+export const moveCallUpdateR = async (props: {
+  txb: TransactionBlock;
+  id: string;
+  new_r: number;
+}) => {
+  const moduleName = "dev_nft";
+  const methodName = "update_color_r";
+
+  props.txb.moveCall({
+    target: `${NFT_PACKAGE_ID}::${moduleName}::${methodName}`,
+    arguments: [props.txb.object(props.id), props.txb.pure(props.new_r)],
+  });
+};
+
+export const moveCallUpdateG = async (props: {
+  txb: TransactionBlock;
+  id: string;
+  new_g: number;
+}) => {
+  const moduleName = "dev_nft";
+  const methodName = "update_color_g";
+
+  props.txb.moveCall({
+    target: `${NFT_PACKAGE_ID}::${moduleName}::${methodName}`,
+    arguments: [props.txb.object(props.id), props.txb.pure(props.new_g)],
+  });
+};
+
+export const moveCallUpdateB = async (props: {
+  txb: TransactionBlock;
+  id: string;
+  new_b: number;
+}) => {
+  const moduleName = "dev_nft";
+  const methodName = "update_color_b";
+
+  props.txb.moveCall({
+    target: `${NFT_PACKAGE_ID}::${moduleName}::${methodName}`,
+    arguments: [props.txb.object(props.id), props.txb.pure(props.new_b)],
+  });
+};
+
 export const moveCallTransferNft = async (id: string, toAddress: string) => {
   const tx = new TransactionBlock();
   const moduleName = "dev_nft";

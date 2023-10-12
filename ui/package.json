@@ -11,6 +11,8 @@
   "dependencies": {
     "@mysten/sui.js": "0.41.1",
     "@suiet/wallet-kit": "^0.2.19",
+    "canvas": "^2.11.2",
+    "fs": "0.0.1-security",
     "next": "13.5.4",
     "react": "^18",
     "react-dom": "^18"

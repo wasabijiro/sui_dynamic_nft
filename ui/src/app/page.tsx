@@ -2,10 +2,21 @@
 
 import { ConnectButton, useWallet } from "@suiet/wallet-kit";
 import { useState, useEffect } from "react";
-import { moveCallMintNft } from "../libs/movecall";
-import { TransactionBlock } from "@mysten/sui.js";
+import {
+  moveCallMintNft,
+  moveCallUpdateR,
+  moveCallUpdateG,
+  moveCallUpdateB,
+} from "../libs/movecall";
 import { NFT_PACKAGE_ID } from "../config/constants";
 import { getUrl } from "@/libs/getObject";
+import {
+  ObjectId,
+  getObjectFields,
+  getObjectId,
+  TransactionBlock,
+} from "@mysten/sui.js";
+import { providerSuiTestnet } from "../config/sui";
 
 export default function Home() {
   const { signAndExecuteTransactionBlock } = useWallet();
@@ -15,6 +26,7 @@ export default function Home() {
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [objectId, setObjectId] = useState("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -24,9 +36,9 @@ export default function Home() {
   };
 
   const [color, setColor] = useState({
-    red: 255,
-    green: 255,
-    blue: 255,
+    red: 169,
+    green: 245,
+    blue: 111,
   });
 
   const handleColorChange = (
@@ -41,23 +53,43 @@ export default function Home() {
 
   const rgbColor = `rgb(${color.red}, ${color.green}, ${color.blue})`;
 
+  const getUrl = async (objectId: string): Promise<ObjectId> => {
+    console.log({ objectId });
+    if (!objectId) {
+      throw new Error("Object ID is not available");
+    }
+    const suiObject = await providerSuiTestnet().getObject({
+      // id: objectId,
+      // id: "0x0e358d005fb484d1943d5f096c1780a53d20b78034a0bcf1202f689a77eb5d48",
+      id: "0xed6612983866f8b5ffe392935dd8e20e3b200d481f6387e9c99989bb0484ea5a",
+      options: {
+        showContent: true,
+        showType: true,
+      },
+    });
+    console.log({ suiObject });
+    const { url }: any = getObjectFields(suiObject) || {};
+    return url;
+  };
+
   const exctuteMintNFT = async () => {
     const txb = new TransactionBlock();
 
     moveCallMintNft({
       txb,
-      name: "chopper",
-      description: "mugiwara",
-      url: "https://toy.bandai.co.jp/assets/tamagotchi/images/chopper/img_chara01.png",
+      name: "wasabi",
+      description: "wasabi's icon",
+      // url: "https://toy.bandai.co.jp/assets/tamagotchi/images/chopper/img_chara01.png",
+      url: "https://pbs.twimg.com/profile_images/1538981748478214144/EUjTgb0v_400x400.jpg",
     });
-    const result: any = await signAndExecuteTransactionBlock({
+    const mint_result: any = await signAndExecuteTransactionBlock({
       transactionBlock: txb,
     });
-    console.log({ result });
+    console.log({ mint_result });
     const targetObjectType = `${NFT_PACKAGE_ID}::dev_nft::TestNetNFT`;
     let objectId = null;
-    if (result.objectChanges) {
-      const objectChange = result.objectChanges.find(
+    if (mint_result.objectChanges) {
+      const objectChange = mint_result.objectChanges.find(
         (change: any) => change.objectType === targetObjectType
       );
       objectId = objectChange?.objectId;
@@ -65,15 +97,58 @@ export default function Home() {
 
     if (objectId) {
       console.log({ objectId });
-      localStorage.setItem("ID", objectId);
+      setObjectId(objectId);
+      // localStorage.setItem("ID", objectId);
     } else {
       console.log("No object with the target objectType found");
     }
-    const tx_url = `https://suiexplorer.com/txblock/${result.digest}?network=testnet`;
+    const tx_url = `https://suiexplorer.com/txblock/${mint_result.digest}?network=testnet`;
     console.log(tx_url);
-    const image_url = await getUrl();
+    const image_url = await getUrl(objectId);
     console.log({ image_url });
     setImageUrl(image_url);
+  };
+
+  const executeUpdateR = async (new_r: number) => {
+    const txb = new TransactionBlock();
+
+    moveCallUpdateR({
+      txb,
+      id: objectId,
+      new_r: new_r,
+    });
+    const r_result: any = await signAndExecuteTransactionBlock({
+      transactionBlock: txb,
+    });
+    console.log({ r_result });
+  };
+
+  const executeUpdateG = async (new_r: number) => {
+    const txb = new TransactionBlock();
+
+    moveCallUpdateR({
+      txb,
+      id: objectId,
+      new_r: new_r,
+    });
+    const g_result: any = await signAndExecuteTransactionBlock({
+      transactionBlock: txb,
+    });
+    console.log({ g_result });
+  };
+
+  const executeUpdateB = async (new_r: number) => {
+    const txb = new TransactionBlock();
+
+    moveCallUpdateR({
+      txb,
+      id: objectId,
+      new_r: new_r,
+    });
+    const b_result: any = await signAndExecuteTransactionBlock({
+      transactionBlock: txb,
+    });
+    console.log({ b_result });
   };
 
   useEffect(() => {
@@ -90,7 +165,7 @@ export default function Home() {
       </header>
       <div className="flex items-center justify-center">
         <form className="space-y-4">
-          <input
+          {/* <input
             className="w-full px-4 py-2 text-black border border-gray-300 bg-white rounded-md focus:outline-none"
             placeholder="Please enter name..."
             value={name}
@@ -107,19 +182,21 @@ export default function Home() {
             placeholder="Please enter URL..."
             value={url}
             onChange={(e) => handleInputChange(e, setUrl)}
-          />
-          <button
-            className="mx-auto text-white bg-blue-500 rounded-md px-4 py-2"
-            onClick={async (event: any) => {
-              event.preventDefault();
-              await exctuteMintNFT();
-              setName("");
-              setDescription("");
-              setUrl("");
-            }}
-          >
-            Mint
-          </button>
+          /> */}
+          {!imageUrl && (
+            <button
+              className="mx-auto text-white bg-blue-500 rounded-md px-4 py-2"
+              onClick={async (event: any) => {
+                event.preventDefault();
+                await exctuteMintNFT();
+                setName("");
+                setDescription("");
+                setUrl("");
+              }}
+            >
+              Mint
+            </button>
+          )}
           {imageUrl && (
             <div className="flex items-center mt-4 gap-10">
               <img src={imageUrl} alt="Dynamic" className="mr-4" />
@@ -132,8 +209,14 @@ export default function Home() {
                     max="255"
                     value={color.red}
                     onChange={(e) => handleColorChange(e, "red")}
+                    onMouseUp={(e) =>
+                      executeUpdateR(
+                        parseInt((e.target as HTMLInputElement).value)
+                      )
+                    }
                     style={{ width: "300px" }}
                   />
+                  <span className="ml-2">{color.red}</span>
                 </div>
                 <div className="flex items-center mb-2">
                   <label style={{ width: "60px" }}>Green:</label>
@@ -143,8 +226,14 @@ export default function Home() {
                     max="255"
                     value={color.green}
                     onChange={(e) => handleColorChange(e, "green")}
+                    onMouseUp={(e) =>
+                      executeUpdateG(
+                        parseInt((e.target as HTMLInputElement).value)
+                      )
+                    }
                     style={{ width: "300px" }}
                   />
+                  <span className="ml-2">{color.green}</span>
                 </div>
                 <div className="flex items-center mb-2">
                   <label style={{ width: "60px" }}>Blue:</label>
@@ -154,8 +243,14 @@ export default function Home() {
                     max="255"
                     value={color.blue}
                     onChange={(e) => handleColorChange(e, "blue")}
+                    onMouseUp={(e) =>
+                      executeUpdateB(
+                        parseInt((e.target as HTMLInputElement).value)
+                      )
+                    }
                     style={{ width: "300px" }}
                   />
+                  <span className="ml-2">{color.blue}</span>
                 </div>
               </div>
             </div>

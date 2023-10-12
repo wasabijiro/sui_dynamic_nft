@@ -10,7 +10,7 @@ export const TESTNET_RPC_API_URL = "https://fullnode.testnet.sui.io:443";
 // export const DEVNET_RPC_API_URL = 'https://fullnode.devnet.sui.io:443';
 
 export const NFT_PACKAGE_ID =
-  "0xf4df8657a4a7c9af7e5e66f4fbc25254dcddc5ef2a1ee7e63b1211f756cba778";
+  "0xba83262fc82d2ff0252cd445deda25a368fdc6ad4ff16446dd3e468bb35ef1b0";
 
 // export const CONNECTION = new Connection({
 //   fullnode: "https://fullnode.testnet.sui.io",
