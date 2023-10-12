@@ -15,6 +15,9 @@ module nft::dev_nft {
         description: string::String,
         /// URL for the token
         url: Url,
+        color_r: u8,
+        color_g: u8,
+        color_b: u8,
     }
 
     // ===== Events =====
@@ -59,7 +62,10 @@ module nft::dev_nft {
             id: object::new(ctx),
             name: string::utf8(name),
             description: string::utf8(description),
-            url: url::new_unsafe_from_bytes(url)
+            url: url::new_unsafe_from_bytes(url),
+            color_r: 0,
+            color_g: 0,
+            color_b: 0,
         };
 
         event::emit(NFTMinted {
@@ -87,9 +93,33 @@ module nft::dev_nft {
         nft.description = string::utf8(new_description)
     }
 
+    public entry fun update_color_r(
+        nft: &mut TestNetNFT,
+        new_r: u8,
+        _: &mut TxContext
+    ) {
+        nft.color_r = new_r
+    }
+
+    public entry fun update_color_g(
+        nft: &mut TestNetNFT,
+        new_g: u8,
+        _: &mut TxContext
+    ) {
+        nft.color_g = new_g
+    }
+
+    public entry fun update_color_b(
+        nft: &mut TestNetNFT,
+        new_b: u8,
+        _: &mut TxContext
+    ) {
+        nft.color_b = new_b
+    }
+
     /// Permanently delete `nft`
     public entry fun burn(nft: TestNetNFT, _: &mut TxContext) {
-        let TestNetNFT { id, name: _, description: _, url: _ } = nft;
+        let TestNetNFT { id, name: _, description: _, url: _, color_r: _, color_g: _, color_b: _, } = nft;
         object::delete(id)
     }
 }
