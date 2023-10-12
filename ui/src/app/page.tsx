@@ -267,6 +267,12 @@ export default function Home() {
             <div className="flex items-center mt-4 gap-10">
               <img src={imageUrl} alt="Dynamic" className="mr-4" />
               <div className="flex flex-col gap-5">
+                <div
+                  style={{
+                    backgroundColor: `rgb(${color.red}, ${color.green}, ${color.blue})`,
+                  }}
+                  className="rounded-full w-20 h-20 mt-10 ml-40 mb-10 absolute top-[80px]"
+                ></div>
                 <div className="flex items-center mb-2">
                   <label style={{ width: "60px" }}>Red:</label>
                   <input
