@@ -28,6 +28,7 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [objectId, setObjectId] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -75,104 +76,130 @@ export default function Home() {
 
   const exctuteMintNFT = async () => {
     const txb = new TransactionBlock();
+    setMessage("");
 
-    moveCallMintNft({
-      txb,
-      name: "wasabi",
-      description: "wasabi's icon",
-      // url: "https://toy.bandai.co.jp/assets/tamagotchi/images/chopper/img_chara01.png",
-      url: "https://pbs.twimg.com/profile_images/1538981748478214144/EUjTgb0v_400x400.jpg",
-    });
-    const mint_result: any = await signAndExecuteTransactionBlock({
-      transactionBlock: txb,
-    });
-    console.log({ mint_result });
-    let objectId = null;
-    if (mint_result.objectChanges) {
-      const objectChange = mint_result.objectChanges.find(
-        (change: any) => change.objectType === targetObjectType
-      );
-      objectId = objectChange?.objectId;
+    try {
+      moveCallMintNft({
+        txb,
+        name: "wasabi",
+        description: "wasabi's icon",
+        // url: "https://toy.bandai.co.jp/assets/tamagotchi/images/chopper/img_chara01.png",
+        url: "https://pbs.twimg.com/profile_images/1538981748478214144/EUjTgb0v_400x400.jpg",
+      });
+      const mint_result: any = await signAndExecuteTransactionBlock({
+        transactionBlock: txb,
+      });
+      console.log({ mint_result });
+      let objectId = null;
+      if (mint_result.objectChanges) {
+        const objectChange = mint_result.objectChanges.find(
+          (change: any) => change.objectType === targetObjectType
+        );
+        objectId = objectChange?.objectId;
+      }
+      if (objectId) {
+        console.log({ objectId });
+        setObjectId(objectId);
+        // localStorage.setItem("ID", objectId);
+      } else {
+        console.log("No object with the target objectType found");
+      }
+      const tx_url = `https://suiexplorer.com/txblock/${mint_result.digest}?network=testnet`;
+      console.log(tx_url);
+      setMessage("Mint succeeded");
+      const image_url = await getUrl(objectId);
+      console.log({ image_url });
+      setImageUrl(image_url);
+    } catch (err) {
+      console.log("err:", err);
+      setMessage(`Mint failed ${err}`);
     }
-
-    if (objectId) {
-      console.log({ objectId });
-      setObjectId(objectId);
-      // localStorage.setItem("ID", objectId);
-    } else {
-      console.log("No object with the target objectType found");
-    }
-    const tx_url = `https://suiexplorer.com/txblock/${mint_result.digest}?network=testnet`;
-    console.log(tx_url);
-    const image_url = await getUrl(objectId);
-    console.log({ image_url });
-    setImageUrl(image_url);
   };
 
   const executeUpdateR = async (new_r: number) => {
     const txb = new TransactionBlock();
+    setMessage("");
 
-    moveCallUpdateR({
-      txb,
-      id: objectId,
-      new_r: new_r,
-    });
-    const r_result: any = await signAndExecuteTransactionBlock({
-      transactionBlock: txb,
-    });
-    console.log({ r_result });
-    // let id = null;
-    // if (r_result.objectChanges) {
-    //   const objectChange = r_result.objectChanges.find(
-    //     (change: any) => change.objectType === targetObjectType
-    //   );
-    //   id = objectChange?.objectId;
-    // }
+    try {
+      moveCallUpdateR({
+        txb,
+        id: objectId,
+        new_r: new_r,
+      });
+      const r_result: any = await signAndExecuteTransactionBlock({
+        transactionBlock: txb,
+      });
+      console.log({ r_result });
+      setMessage("Transaction succeeded");
+      // let id = null;
+      // if (r_result.objectChanges) {
+      //   const objectChange = r_result.objectChanges.find(
+      //     (change: any) => change.objectType === targetObjectType
+      //   );
+      //   id = objectChange?.objectId;
+      // }
 
-    // if (id) {
-    //   console.log({ id });
-    //   setObjectId(id);
-    //   // localStorage.setItem("ID", objectId);
-    // } else {
-    //   console.log("No object with the target objectType found");
-    // }
-    // const tx_url = `https://suiexplorer.com/txblock/${r_result.digest}?network=testnet`;
-    // console.log(tx_url);
-    // const image_url = await getUrl(objectId);
-    // console.log({ image_url });
-    // setImageUrl(image_url);
+      // if (id) {
+      //   console.log({ id });
+      //   setObjectId(id);
+      //   // localStorage.setItem("ID", objectId);
+      // } else {
+      //   console.log("No object with the target objectType found");
+      // }
+      // const tx_url = `https://suiexplorer.com/txblock/${r_result.digest}?network=testnet`;
+      // console.log(tx_url);
+      // const image_url = await getUrl(objectId);
+      // console.log({ image_url });
+      // setImageUrl(image_url);
+    } catch (err) {
+      console.log("err:", err);
+      setMessage(`Transaction failed ${err}`);
+    }
   };
 
   const executeUpdateG = async (new_g: number) => {
     const txb = new TransactionBlock();
+    setMessage("");
 
-    moveCallUpdateG({
-      txb,
-      id: objectId,
-      new_g: new_g,
-    });
-    const g_result: any = await signAndExecuteTransactionBlock({
-      transactionBlock: txb,
-    });
-    console.log({ g_result });
-    // const image_url = await getUrl(objectId);
-    // setImageUrl(image_url);
+    try {
+      moveCallUpdateG({
+        txb,
+        id: objectId,
+        new_g: new_g,
+      });
+      const g_result: any = await signAndExecuteTransactionBlock({
+        transactionBlock: txb,
+      });
+      console.log({ g_result });
+      // const image_url = await getUrl(objectId);
+      // setImageUrl(image_url);
+      setMessage("Transaction succeeded");
+    } catch (err) {
+      console.log("err:", err);
+      setMessage(`Transaction failed ${err}`);
+    }
   };
 
   const executeUpdateB = async (new_b: number) => {
     const txb = new TransactionBlock();
 
-    moveCallUpdateB({
-      txb,
-      id: objectId,
-      new_b: new_b,
-    });
-    const b_result: any = await signAndExecuteTransactionBlock({
-      transactionBlock: txb,
-    });
-    console.log({ b_result });
-    // const image_url = await getUrl(objectId);
-    // setImageUrl(image_url);
+    try {
+      moveCallUpdateB({
+        txb,
+        id: objectId,
+        new_b: new_b,
+      });
+      const b_result: any = await signAndExecuteTransactionBlock({
+        transactionBlock: txb,
+      });
+      console.log({ b_result });
+      // const image_url = await getUrl(objectId);
+      // setImageUrl(image_url);
+      setMessage("Transaction succeeded");
+    } catch (err) {
+      console.log("err:", err);
+      setMessage(`Transaction failed ${err}`);
+    }
   };
 
   const updateColor = async () => {
@@ -298,6 +325,9 @@ export default function Home() {
             </div>
           )}
         </form>
+        <p className="bg-green-100 text-black p-3 rounded-md fixed bottom-4 left-4 max-w-xs break-words">
+          {message}
+        </p>
       </div>
     </div>
   );
